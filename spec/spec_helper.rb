@@ -1,9 +1,7 @@
-$LOAD_PATH.unshift(File.dirname(__FILE__))
-$LOAD_PATH.unshift(File.join(File.dirname(__FILE__), '..', 'lib'))
-require 'thread_so_safe'
-require 'spec'
-require 'spec/autorun'
+require 'rubygems'
+require 'digest/md5'
 
-Spec::Runner.configure do |config|
-  
-end
+$LOAD_PATH.unshift(File.join(File.dirname(__FILE__), '..', 'lib'))
+$LOAD_PATH.unshift(File.dirname(__FILE__))
+
+require 'thread_so_safe'

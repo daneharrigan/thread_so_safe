@@ -1,24 +1,23 @@
 require 'rubygems'
 require 'rake'
+require 'spec/rake/spectask'
 
 begin
   require 'jeweler'
   Jeweler::Tasks.new do |gem|
     gem.name = "thread_so_safe"
-    gem.summary = %Q{TODO: one-line summary of your gem}
-    gem.description = %Q{TODO: longer description of your gem}
+    gem.version = "0.1"
+    gem.summary = %Q{A simple gem to check whether multiple threads are in-sync.}
     gem.email = "dane.harrigan@gmail.com"
     gem.homepage = "http://github.com/daneharrigan/thread_so_safe"
     gem.authors = ["Dane Harrigan"]
     gem.add_development_dependency "rspec", ">= 1.2.9"
-    # gem is a Gem::Specification... see http://www.rubygems.org/read/chapter/20 for additional settings
   end
   Jeweler::GemcutterTasks.new
 rescue LoadError
   puts "Jeweler (or a dependency) not available. Install it with: gem install jeweler"
 end
 
-require 'spec/rake/spectask'
 Spec::Rake::SpecTask.new(:spec) do |spec|
   spec.libs << 'lib' << 'spec'
   spec.spec_files = FileList['spec/**/*_spec.rb']
@@ -26,8 +25,9 @@ end
 
 Spec::Rake::SpecTask.new(:rcov) do |spec|
   spec.libs << 'lib' << 'spec'
-  spec.pattern = 'spec/**/*_spec.rb'
+  spec.pattern = 'spec/*_spec.rb'
   spec.rcov = true
+  spec.rcov_opts = ['--exclude', 'gem,spec']
 end
 
 task :spec => :check_dependencies
