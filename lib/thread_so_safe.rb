@@ -9,11 +9,10 @@ class ThreadSoSafe
     def safeguard(name)
       @@current_thread = name
       name = file_name(name)
+      path = full_path(name)
 
-      file = File.new(full_path(name),'w+')
-      @@threads[name] = file.mtime
-
-      file.close
+      FileUtils.touch(path) unless File.exists? path
+      @@threads[name] = File.mtime(path)
       return
     end
 
