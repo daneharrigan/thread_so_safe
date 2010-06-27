@@ -13,23 +13,25 @@ Gem::Specification.new do |s|
   s.email = %q{dane.harrigan@gmail.com}
   s.extra_rdoc_files = [
     "LICENSE",
-     "README.rdoc"
+     "README.textile"
   ]
   s.files = [
     ".document",
      ".gitignore",
      "LICENSE",
-     "README.rdoc",
+     "README.textile",
      "Rakefile",
      "lib/thread_so_safe.rb",
      "spec/spec_helper.rb",
-     "spec/thread_so_safe_spec.rb"
+     "spec/thread_so_safe_spec.rb",
+     "thread_so_safe-0.1.gem",
+     "thread_so_safe.gemspec"
   ]
   s.homepage = %q{http://github.com/daneharrigan/thread_so_safe}
   s.rdoc_options = ["--charset=UTF-8"]
   s.require_paths = ["lib"]
   s.rubygems_version = %q{1.3.6}
-  s.summary = %q{A simple gem to check whether multiple threads are in-sync.}
+  s.summary = %q{thread_so_safe is a very simple gem to help keep multi-threaded environments synced.}
   s.test_files = [
     "spec/spec_helper.rb",
      "spec/thread_so_safe_spec.rb"

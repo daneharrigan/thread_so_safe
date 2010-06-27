@@ -7,7 +7,7 @@ begin
   Jeweler::Tasks.new do |gem|
     gem.name = "thread_so_safe"
     gem.version = "0.1"
-    gem.summary = %Q{A simple gem to check whether multiple threads are in-sync.}
+    gem.summary = %Q{thread_so_safe is a very simple gem to help keep multi-threaded environments synced.}
     gem.email = "dane.harrigan@gmail.com"
     gem.homepage = "http://github.com/daneharrigan/thread_so_safe"
     gem.authors = ["Dane Harrigan"]
