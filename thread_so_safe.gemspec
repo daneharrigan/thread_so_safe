@@ -24,7 +24,6 @@ Gem::Specification.new do |s|
      "lib/thread_so_safe.rb",
      "spec/spec_helper.rb",
      "spec/thread_so_safe_spec.rb",
-     "thread_so_safe-0.1.gem",
      "thread_so_safe.gemspec"
   ]
   s.homepage = %q{http://github.com/daneharrigan/thread_so_safe}
