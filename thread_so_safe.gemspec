@@ -10,16 +10,17 @@ Gem::Specification.new do |s|
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Dane Harrigan"]
   s.date = %q{2010-06-27}
+  s.description = %q{thread_so_safe is a very simple gem to help keep multi-threaded environments synced.}
   s.email = %q{dane.harrigan@gmail.com}
   s.extra_rdoc_files = [
     "LICENSE",
-     "README.textile"
+     "README.rdoc"
   ]
   s.files = [
     ".document",
      ".gitignore",
      "LICENSE",
-     "README.textile",
+     "README.rdoc",
      "Rakefile",
      "lib/thread_so_safe.rb",
      "spec/spec_helper.rb",
