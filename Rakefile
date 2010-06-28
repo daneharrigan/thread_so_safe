@@ -6,7 +6,7 @@ begin
   require 'jeweler'
   Jeweler::Tasks.new do |gem|
     gem.name = "thread_so_safe"
-    gem.version = "0.1"
+    gem.version = "0.1.1"
     gem.summary = %Q{thread_so_safe is a very simple gem to help keep multi-threaded environments synced.}
     gem.description = gem.summary
     gem.email = "dane.harrigan@gmail.com"
