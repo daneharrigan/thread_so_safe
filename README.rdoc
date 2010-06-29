@@ -1,17 +1,48 @@
 = thread_so_safe
 
-thread_so_safe is a very simple gem to help keep multi-threaded environments synced.
++thread_so_safe+ is a very simple gem to help keep data accessed in multiple threads synced.
 
-== Examples
 
+== What is this thing?
+
+Well the description pretty much says it all. +thread_so_safe+ is a gem to help keep data accessed in multiple threads synced.
+
+
+== Why do I care?
+
+That's a great question! Your data is important. If your data changes during the lifecycle of your application, your application may not run properly. Oh no! That sounds terrible! Luckily we can make our code smart enough that we don't have to worry about this.
+
+
+== Are you reinventing the wheel?
+
+Absolutely not! +thread_so_safe+ is not a wheel, but I might be reinventing a thread-safety mechanism. Some approaches to thread-safety lock the data from every other thread until the current thread is finished with the data. This has the potential to slow down your app quite a bit if you have many threads. Other approaches update the data found in each thread. This works when you know what you're looking for. +thread_so_safe+ gives you the means of checking, "has my data changed or is it still safe?" and, "I've changed my data, better send an update to any other threads that might be using this data."
+
+
+== Example time
+
+  # It's time to register your application or data with ThreadSoSafe!
+  # Just pass in a unique string to the safeguard method to generate a
+  # new thread-safety token.
   ThreadSoSafe.safeguard('My.App Users')
+
+  # Great! Now lets capture our data
   users = User.find(:all)
+  
+  # Lets make a change to our data set
+  users.last.destroy
+  
+  # Our data has changed so let's send an update to ThreadSoSafe so that
+  # any other piece of code using ThreadSoSafe.safeguard('My.App Users')
+  # will know the data has changed.
+  ThreadSoSafe.update!
   
   # ...
   
-  unless ThreadSoSafe.safe?
-    users = User.find(:all)
-    ThreadSoSafe.update!
+  # Well we've changed the data, but as anyone else in the meanwhile?
+  # We can use the safe? method to check.
+  if ThreadSoSafe.safe?
+    puts "The data is great! Keep going!"
+    # ...
   end
   
   ###
@@ -27,10 +58,24 @@ thread_so_safe is a very simple gem to help keep multi-threaded environments syn
   roles = Role.find(:all)
   
   # ...
-  
+
+  # Notice we're calling safe? but with a string now
   unless ThreadSoSafe.safe?('Roles')
     users = User.find(:all)
+
+    # Also notice we're calling update!, but with a string as well.
     ThreadSoSafe.update!('Roles)
   end  
+
+
+== So... I have to use this in my app?
+
+Yes. +thread_so_safe+ is just the mechanism used to keep track and inform whether or not data has changed. If have App1 using +thread_so_safe+, but App2 doesn't -- *and* manipulates the same data, your data wont be in sync. You'll need to use +thread_so_safe+ with both App1 and App2.
+
+
+== Questions/Comments
+
+Feel free to send me a message on Github or on Twitter (@daneharrigan). Thanks!
+
 
 Copyright (c) 2010 Dane Harrigan. See LICENSE for details.
