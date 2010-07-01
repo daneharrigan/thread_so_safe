@@ -7,13 +7,13 @@ describe ThreadSoSafe do
   end
 
   it "should be safe without passing the application name" do
-    ThreadSoSafe.safeguard(@app_name)
-    ThreadSoSafe.safe?.should == true
+    ThreadSoSafe.register_token(@app_name)
+    ThreadSoSafe.in_sync?.should == true
   end
 
   it "should be safe with the application name passed" do
-    ThreadSoSafe.safeguard(@app_name)
-    ThreadSoSafe.safe?(@app_name).should == true    
+    ThreadSoSafe.register_token(@app_name)
+    ThreadSoSafe.in_sync?(@app_name).should == true    
   end
 
   it "should encode the application name with md5" do
@@ -41,7 +41,7 @@ describe ThreadSoSafe do
 
   context "when another thread updates the thread-safe token" do
     before(:each) do
-      ThreadSoSafe.safeguard(@app_name)
+      ThreadSoSafe.register_token(@app_name)
 
       file_name = ThreadSoSafe.send(:file_name, @app_name)
       full_path = ThreadSoSafe.send(:full_path, file_name)
@@ -50,17 +50,17 @@ describe ThreadSoSafe do
     end
 
     it "should not be safe without passing the application name" do
-      ThreadSoSafe.safe?.should == false
+      ThreadSoSafe.in_sync?.should == false
     end
 
     it "should be safe with the application name passed" do
-      ThreadSoSafe.safe?(@app_name).should == false
+      ThreadSoSafe.in_sync?(@app_name).should == false
     end
   end
 
   context "when updating the thread-safe token" do
     before(:each) do
-      ThreadSoSafe.safeguard(@app_name)
+      ThreadSoSafe.register_token(@app_name)
       file_name = ThreadSoSafe.send(:file_name, @app_name)
       @full_path = ThreadSoSafe.send(:full_path, file_name)
 
@@ -76,6 +76,26 @@ describe ThreadSoSafe do
     it "should update the mtime on the /tmp file without the application name passed" do
       ThreadSoSafe.update!
       File.mtime(@full_path).should_not == @mtime
+    end
+  end
+
+  context "when resetting the thread-safe token" do
+    before(:each) do
+      ThreadSoSafe.register_token(@app_name)
+      file_name = ThreadSoSafe.send(:file_name, @app_name)
+      @full_path = ThreadSoSafe.send(:full_path, file_name)
+    end
+
+    it "should not be in sync" do
+      ThreadSoSafe.reset!
+      ThreadSoSafe.in_sync?.should == false
+    end
+
+    it "should update the timestamp on the /tmp file" do
+      original_mtime = File.mtime(@full_path)
+      sleep(1)
+      ThreadSoSafe.reset!
+      File.mtime(@full_path).should_not == original_mtime
     end
   end
 

@@ -1,3 +1,14 @@
+# Register thread/token
+# Have I been changed?
+# Update myself/token and notify other threads
+# Update token only and notify other threads
+#
+# ThreadSoSafe.register_token('this_that')
+# ThreadSoSafe.in_sync?
+# ThreadSoSafe.reset!
+# ThreadSoSafe.update!
+
+
 require 'digest/md5'
 require 'fileutils'
 
@@ -6,7 +17,7 @@ class ThreadSoSafe
   @@current_thread = nil
 
   class << self
-    def safeguard(name)
+    def register_token(name)
       @@current_thread = name
       name = file_name(name)
       path = full_path(name)
@@ -16,7 +27,7 @@ class ThreadSoSafe
       return
     end
 
-    def safe?(name=@@current_thread)
+    def in_sync?(name=@@current_thread)
       @@current_thread = name
       name = file_name(name)
 
@@ -24,11 +35,18 @@ class ThreadSoSafe
     end
 
     def update!(name=@@current_thread)
-      name = file_name(name)
+      encoded_name = file_name(name)
       file = full_path(name)
 
-      FileUtils.touch(file) if @@threads[name] == File.mtime(file)
-      @@threads[name] = File.mtime(file)
+      reset!(name) if @@threads[encoded_name] == File.mtime(file)
+      @@threads[encoded_name] = File.mtime(file)
+      return
+    end
+
+    def reset!(name=@@current_thread)
+      file = full_path file_name(name)
+      FileUtils.touch(file)
+      return
     end
 
     private
