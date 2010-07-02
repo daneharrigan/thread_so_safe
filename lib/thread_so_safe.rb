@@ -9,36 +9,29 @@ class ThreadSoSafe
     # Register thread/token
     def register_token(name)
       @@current_thread = name
-      name = file_name(name)
-      path = full_path(name)
-
-      FileUtils.touch(path) unless File.exists? path
-      @@threads[name] = File.mtime(path)
+      token = file_name(name)
+      @@threads[token] = set_timestamp(token)
       return
     end
 
     # Have I been changed?
     def in_sync?(name=@@current_thread)
       @@current_thread = name
-      name = file_name(name)
+      token = file_name(name)
 
-      @@threads[name] == File.mtime("#{full_path name}")
+      @@threads[token] == File.read(full_path(token))
     end
 
     # Update myself and token and notify other threads
     def update!(name=@@current_thread)
-      encoded_name = file_name(name)
-      file = full_path(name)
-
-      reset!(name) if @@threads[encoded_name] == File.mtime(file)
-      @@threads[encoded_name] = File.mtime(file)
+      token = file_name(name)
+      @@threads[token] = set_timestamp(token)
       return
     end
 
     # Update token only and notify other threads
     def reset!(name=@@current_thread)
-      file = full_path file_name(name)
-      FileUtils.touch(file)
+      set_timestamp file_name(name)
       return
     end
 
@@ -60,6 +53,7 @@ class ThreadSoSafe
 
     #:nordoc:
     def use_default_directory?
+      FileUtils.mkdir(default_directory) unless File.exists?(default_directory)
       File.writable?(default_directory)
     end
 
@@ -71,6 +65,13 @@ class ThreadSoSafe
     #:nordoc:
     def gem_directory
       File.expand_path(File.dirname(__FILE__)+'/../tmp')
+    end
+
+    #:nordoc:
+    def set_timestamp(token)
+      timestamp = Time.now.to_f.to_s
+      File.open(full_path(token), 'w+') { |f| f.write timestamp }
+      timestamp
     end
   end
 end

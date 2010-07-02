@@ -2,22 +2,29 @@ require "spec_helper"
 
 describe ThreadSoSafe do
   before(:all) do
-    @app_name = 'My.Application'
+    @token = 'My.Application'
     @default_directory = '/tmp/thread_so_safe'
+
+    ThreadSoSafe.register_token(@token)
+  end
+  
+  after(:suite) do
+    gem_directory = ThreadSoSafe.send(:gem_directory)
+  
+    FileUtils.rm_rf(@default_directory) if File.exists?(@default_directory)
+    FileUtils.rm_rf("#{gem_directory}/*")
   end
 
-  it "should be safe without passing the application name" do
-    ThreadSoSafe.register_token(@app_name)
+  it "should be in-sync without passing the token" do
     ThreadSoSafe.in_sync?.should == true
   end
 
-  it "should be safe with the application name passed" do
-    ThreadSoSafe.register_token(@app_name)
-    ThreadSoSafe.in_sync?(@app_name).should == true    
+  it "should be in-sync with the token passed" do
+    ThreadSoSafe.in_sync?(@token).should == true
   end
 
-  it "should encode the application name with md5" do
-    ThreadSoSafe.send(:file_name,@app_name).should == Digest::MD5.hexdigest(@app_name)  
+  it "should encode the token with md5" do
+    ThreadSoSafe.send(:file_name,@token).should == Digest::MD5.hexdigest(@token)  
   end
 
   it "should return /tmp/thread_so_safe as the default directory" do
@@ -35,67 +42,71 @@ describe ThreadSoSafe do
   end
 
   it "should return the full path to the /tmp file" do
-    file_name = ThreadSoSafe.send(:file_name, @app_name)
+    file_name = ThreadSoSafe.send(:file_name, @token)
     ThreadSoSafe.send(:full_path, file_name).should == "#{@default_directory}/#{file_name}"
   end
 
   context "when another thread updates the thread-safe token" do
-    before(:each) do
-      ThreadSoSafe.register_token(@app_name)
-
-      file_name = ThreadSoSafe.send(:file_name, @app_name)
+    before(:all) do
+      file_name = ThreadSoSafe.send(:file_name, @token)
       full_path = ThreadSoSafe.send(:full_path, file_name)
 
-      File.stub!(:mtime).and_return(Time.now+100)
+      File.open(full_path, 'w') { |f| f.write(Time.now.to_f) }
     end
 
-    it "should not be safe without passing the application name" do
+    it "should not be safe without passing the token" do
       ThreadSoSafe.in_sync?.should == false
     end
 
-    it "should be safe with the application name passed" do
-      ThreadSoSafe.in_sync?(@app_name).should == false
+    it "should be safe with the token passed" do
+      ThreadSoSafe.in_sync?(@token).should == false
     end
   end
 
   context "when updating the thread-safe token" do
-    before(:each) do
-      ThreadSoSafe.register_token(@app_name)
-      file_name = ThreadSoSafe.send(:file_name, @app_name)
+    before(:all) do
+      file_name = ThreadSoSafe.send(:file_name, @token)
       @full_path = ThreadSoSafe.send(:full_path, file_name)
-
-      @mtime = File.mtime @full_path
-      File.stub!(:mtime).and_return(Time.now+100)
+      @file_content = File.read(@full_path)
     end
 
-    it "should update the mtime on the /tmp file with the application name passed" do
-      ThreadSoSafe.update!(@app_name)
-      File.mtime(@full_path).should_not == @mtime
+    it "should update the file content in on the /tmp file with the token passed" do
+      ThreadSoSafe.update!(@token)
+      File.read(@full_path).should_not == @file_content
     end
 
-    it "should update the mtime on the /tmp file without the application name passed" do
+    it "should update the file content on the /tmp file without the token passed" do
       ThreadSoSafe.update!
-      File.mtime(@full_path).should_not == @mtime
+      File.read(@full_path).should_not == @file_content
     end
   end
 
   context "when resetting the thread-safe token" do
-    before(:each) do
-      ThreadSoSafe.register_token(@app_name)
-      file_name = ThreadSoSafe.send(:file_name, @app_name)
+    before(:all) do
+      file_name = ThreadSoSafe.send(:file_name, @token)
       @full_path = ThreadSoSafe.send(:full_path, file_name)
     end
 
-    it "should not be in sync" do
+    it "should not be in sync without the token passed" do
       ThreadSoSafe.reset!
       ThreadSoSafe.in_sync?.should == false
     end
 
-    it "should update the timestamp on the /tmp file" do
-      original_mtime = File.mtime(@full_path)
-      sleep(1)
+    it "should not be in sync with the token passed" do
+      ThreadSoSafe.reset!(@token)
+      ThreadSoSafe.in_sync?.should == false
+    end
+
+    it "should update the file content on the /tmp file without the token passed" do
+      file_content = File.read(@full_path)
       ThreadSoSafe.reset!
-      File.mtime(@full_path).should_not == original_mtime
+      File.read(@full_path).should_not == file_content
+    end
+
+    it "should update the file content on the /tmp file with the token passed" do
+      file_content = File.read(@full_path)
+      ThreadSoSafe.reset!(@token)
+      File.read(@full_path).should_not == file_content
     end
   end
 
