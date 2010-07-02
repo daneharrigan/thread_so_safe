@@ -8,7 +8,11 @@ describe ThreadSoSafe do
     ThreadSoSafe.register_token(@token)
   end
   
-  after(:suite) do
+  # :all works differently in rspec 1.3.0 and 2.0.
+  # :suite runs after everything is done in 2.0 like :all did in 1.3.0
+  # The Spec namespace has also been renamed to RSpec so I'm looking
+  # for Spec and if it doesn't exist then it must be RSpec 2
+  after(defined?(Spec) ? :all : :suite) do
     gem_directory = ThreadSoSafe.send(:gem_directory)
   
     FileUtils.rm_rf(@default_directory) if File.exists?(@default_directory)
