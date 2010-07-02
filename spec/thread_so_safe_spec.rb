@@ -66,6 +66,17 @@ describe ThreadSoSafe do
       ThreadSoSafe.update!
       File.read(@full_path).should_not == @file_content
     end
+
+    context "when the remote token is udpated by another thread" do
+      before(:each) do
+        File.open(@full_path, 'w') { |f| f.write(Time.now.to_i) }
+      end
+
+      it "should use the token stored in the /tmp file" do
+        ThreadSoSafe.update!(@token)
+        ThreadSoSafe.in_sync?.should == true
+      end
+    end
   end
 
   context "when another thread updates the thread-safe token" do
