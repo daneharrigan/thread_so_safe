@@ -12,7 +12,7 @@ begin
     gem.email = "dane.harrigan@gmail.com"
     gem.homepage = "http://github.com/daneharrigan/thread_so_safe"
     gem.authors = ["Dane Harrigan"]
-    gem.add_development_dependency "rspec", ">= 1.2.9"
+    gem.add_development_dependency "rspec", ">= 1.3.0"
   end
   Jeweler::GemcutterTasks.new
 rescue LoadError

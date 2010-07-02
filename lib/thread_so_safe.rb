@@ -25,7 +25,12 @@ class ThreadSoSafe
     # Update myself and token and notify other threads
     def update!(name=@@current_thread)
       token = file_name(name)
-      @@threads[token] = set_timestamp(token)
+      file_content = File.read full_path(token)
+      if @@threads[token] == file_content
+        @@threads[token] = set_timestamp(token)
+      else
+        @@threads[token] = file_content
+      end
       return
     end
 

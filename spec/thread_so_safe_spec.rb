@@ -7,12 +7,12 @@ describe ThreadSoSafe do
 
     ThreadSoSafe.register_token(@token)
   end
-  
+
   # :all works differently in rspec 1.3.0 and 2.0.
   # :suite runs after everything is done in 2.0 like :all did in 1.3.0
   # The Spec namespace has also been renamed to RSpec so I'm looking
   # for Spec and if it doesn't exist then it must be RSpec 2
-  after(defined?(Spec) ? :all : :suite) do
+  after(defined?(RSpec) ? :suite : :all) do
     gem_directory = ThreadSoSafe.send(:gem_directory)
   
     FileUtils.rm_rf(@default_directory) if File.exists?(@default_directory)
@@ -50,6 +50,24 @@ describe ThreadSoSafe do
     ThreadSoSafe.send(:full_path, file_name).should == "#{@default_directory}/#{file_name}"
   end
 
+  context "when updating the thread-safe token" do
+    before(:each) do
+      file_name = ThreadSoSafe.send(:file_name, @token)
+      @full_path = ThreadSoSafe.send(:full_path, file_name)
+      @file_content = File.read(@full_path)
+    end
+
+    it "should update the file content in on the /tmp file with the token passed" do
+      ThreadSoSafe.update!(@token)
+      File.read(@full_path).should_not == @file_content
+    end
+
+    it "should update the file content on the /tmp file without the token passed" do
+      ThreadSoSafe.update!
+      File.read(@full_path).should_not == @file_content
+    end
+  end
+
   context "when another thread updates the thread-safe token" do
     before(:all) do
       file_name = ThreadSoSafe.send(:file_name, @token)
@@ -64,24 +82,6 @@ describe ThreadSoSafe do
 
     it "should be safe with the token passed" do
       ThreadSoSafe.in_sync?(@token).should == false
-    end
-  end
-
-  context "when updating the thread-safe token" do
-    before(:all) do
-      file_name = ThreadSoSafe.send(:file_name, @token)
-      @full_path = ThreadSoSafe.send(:full_path, file_name)
-      @file_content = File.read(@full_path)
-    end
-
-    it "should update the file content in on the /tmp file with the token passed" do
-      ThreadSoSafe.update!(@token)
-      File.read(@full_path).should_not == @file_content
-    end
-
-    it "should update the file content on the /tmp file without the token passed" do
-      ThreadSoSafe.update!
-      File.read(@full_path).should_not == @file_content
     end
   end
 

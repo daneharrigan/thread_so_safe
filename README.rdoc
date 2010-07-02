@@ -21,52 +21,103 @@ Absolutely not! +thread_so_safe+ is not a wheel, but I might be reinventing a th
 == Example time
 
   # It's time to register your application or data with ThreadSoSafe!
-  # Just pass in a unique string to the safeguard method to generate a
-  # new thread-safety token.
-  ThreadSoSafe.safeguard('My.App Users')
+  # Just pass in a unique string to the register_token method to generate
+  # a new thread-safety token.
+  ThreadSoSafe.register_token('My.App Users')
 
   # Great! Now lets capture our data
   users = User.find(:all)
-  
+
   # Lets make a change to our data set
   users.last.destroy
-  
+
   # Our data has changed so let's send an update to ThreadSoSafe so that
-  # any other piece of code using ThreadSoSafe.safeguard('My.App Users')
+  # any other piece of code using ThreadSoSafe.register_token('My.App Users')
   # will know the data has changed.
   ThreadSoSafe.update!
-  
+
   # ...
-  
+
   # Well we've changed the data, but as anyone else in the meanwhile?
-  # We can use the safe? method to check.
-  if ThreadSoSafe.safe?
+  # We can use the in_sync? method to check.
+  if ThreadSoSafe.in_sync?
     puts "The data is great! Keep going!"
     # ...
   end
-  
+
   ###
-  
+
   # if you're working with multiple data sets that need to be in sync
   # you can pass the name (in the first example's case, My.App Users)
-  # into the safe? and update!
-  
-  ThreadSoSafe.safeguard('Users')
+  # into the in_sync? and update!
+
+  ThreadSoSafe.register_token('Users')
   users = User.find(:all)
-  
-  ThreadSoSafe.safeguard('Roles')
+
+  ThreadSoSafe.register_token('Roles')
   roles = Role.find(:all)
-  
+
   # ...
 
-  # Notice we're calling safe? but with a string now
-  unless ThreadSoSafe.safe?('Roles')
+  # Notice we're calling in_sync? but with a string now
+  unless ThreadSoSafe.in_sync?('Roles')
     users = User.find(:all)
 
     # Also notice we're calling update!, but with a string as well.
     ThreadSoSafe.update!('Roles)
-  end  
+  end
 
+  ###
+
+  # We can notify other threads that data has changed with update!,
+  # but that updates our thread token as well. I've hit a case where
+  # I want to notify other threads that my data has changed AND force
+  # a reload of data in my current thread. This is why I made a reset!
+  # method. Calling reset! updates the token that all threads reference,
+  # but does not update the token stored in the gem. This results in
+  # in_sync? returning false and your code can pull the appropriate data
+  # and call update! afterwards to re-sync the threads.
+
+  class Settings < ActiveRecord::Base
+    class << self
+      def [](key)
+        load_collection
+        @settings_collection[key]
+      end
+
+      def []=(key, value)
+        item = find_or_create_by(:key => key)
+        item.value = value
+        item.save!
+
+        ThreadSoSafe.reset!
+        # We've reset the token. Next time Settings[:key] is called the
+        # load_collection method will rebuild the @settings_collection
+      end
+
+      private
+      def load_collection        
+        if @settings_collection.nil?
+          # Our @settings_collection variable doesn't exist so register your token
+          ThreadSoSafe.register_token('MyAppSettings')
+        elsif ThreadSoSafe.in_sync?
+          # If our token is already registered and we're in-sync just return and
+          # don't bother running the rest of the code
+          return
+        end  
+
+        # We've just registered our token or we're not in-sync anymore. I guess
+        # we had better reload our data
+
+        @settings_collection = {}
+
+        all.each { |s| @settings_collection[s.key] = s.value }
+
+        # We reloaded our data so lets inform the thread that we're re-synced
+        ThreadSoSafe.update!
+      end
+    end
+  end
 
 == So... I have to use this in my app?
 
