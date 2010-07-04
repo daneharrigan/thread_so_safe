@@ -47,7 +47,28 @@ class ThreadSoSafe
       @@threads[token] == File.read(full_path(token))
     end
 
-    # Update myself and token and notify other threads
+    # update! - This method updates the ThreadSoSafe session. Aftering being called,
+    # the in_sync? method will return true on the current thread, but false on any
+    # other thread until update! is called on it.
+    #
+    # ==== Example
+    #   # thread 1
+    #   ThreadSoSafe.register_token('My.Application Users')
+    #   users = User.find(:all)
+    #   users.last.destroy
+    #   ThreadSoSafe.update!
+    # 
+    #   if ThreadSoSafe.in_sync?
+    #     puts "Data is in sync"
+    #   end
+    #
+    #   ####
+    #
+    #   # thread 2
+    #   unless ThreadSoSafe.in_sync?
+    #     puts "Data is out of sync"
+    #     users = User.find(:all)
+    #   end
     def update!(name=@@current_token)
       token = file_name(name)
       file_content = File.read full_path(token)
