@@ -18,6 +18,13 @@ That's a great question! Your data is important. If your data changes during the
 Absolutely not! +thread_so_safe+ is not a wheel, but I might be reinventing a thread-safety mechanism. Some approaches to thread-safety lock the data from every other thread until the current thread is finished with the data. This has the potential to slow down your app quite a bit if you have many threads. Other approaches update the data found in each thread. This works when you know what you're looking for. +thread_so_safe+ gives you the means of checking, "has my data changed or is it still safe?" and, "I've changed my data, better send an update to any other threads that might be using this data."
 
 
+== That sounds fancy, but how does it really work?
+
+When you call +register_token+ it creates a file in +/tmp/thread_so_safe+. This file contains the +Time.now.to_i+ value at the time of creation. The time value is also stored in +ThreadSoSafe+'s memory. The +in_sync?+ method checks value stored in the +ThreadSoSafe+ object against the value in the file. If they match the thread is safe, but if they don't match +in_sync?+ will return false to indicating the thread isn't safe or synced anymore. The +update!+ and +reset!+ methods update the time value in the file.
+
+At first I tried using only the timestamp of the file, but file timestamps only record hours, minutes and seconds. A lot can happen to a data source in one second. It's because of this that I decided to store the +Time.now.to_i+ value. +Time.now+ returns a time value with much greater detail than jus seconds, so it looked like a good idea.
+
+
 == Example time
 
   # It's time to register your application or data with ThreadSoSafe!

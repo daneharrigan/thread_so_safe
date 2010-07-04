@@ -68,6 +68,7 @@ class ThreadSoSafe
     #   unless ThreadSoSafe.in_sync?
     #     puts "Data is out of sync"
     #     users = User.find(:all)
+    #     ThreadSoSafe.update!
     #   end
     def update!(name=@@current_token)
       token = file_name(name)
@@ -81,6 +82,32 @@ class ThreadSoSafe
     end
 
     # Update token only and notify other threads
+
+    # reset! - This method updates the ThreadSoSafe session. Every thread, including
+    # the current, is notified of the change. This notification causes the in_sync?
+    # method returns false until update! is called.
+    # 
+    # ==== Example
+    #   # thread 1
+    #   ThreadSoSafe.register_token('My.Application Users')
+    #   users = User.find(:all)
+    #   users.last.destroy
+    #   ThreadSoSafe.reset!
+    # 
+    #   unless ThreadSoSafe.in_sync?
+    #     puts "Data needs to be recaptured"
+    #     users = User.find(:all)
+    #     ThreadSoSafe.update!
+    #   end
+    #
+    #   ####
+    #
+    #   # thread 2
+    #   unless ThreadSoSafe.in_sync?
+    #     puts "Data is out of sync"
+    #     users = User.find(:all)
+    #     ThreadSoSafe.update!
+    #   end
     def reset!(name=@@current_token)
       set_timestamp file_name(name)
       return
