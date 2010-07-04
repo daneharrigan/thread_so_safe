@@ -5,11 +5,11 @@
 
 Gem::Specification.new do |s|
   s.name = %q{thread_so_safe}
-  s.version = "0.1.1"
+  s.version = "0.2"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Dane Harrigan"]
-  s.date = %q{2010-06-27}
+  s.date = %q{2010-07-04}
   s.description = %q{thread_so_safe is a very simple gem to help keep multi-threaded environments synced.}
   s.email = %q{dane.harrigan@gmail.com}
   s.extra_rdoc_files = [
@@ -17,8 +17,7 @@ Gem::Specification.new do |s|
      "README.rdoc"
   ]
   s.files = [
-    ".document",
-     ".gitignore",
+    ".gitignore",
      "LICENSE",
      "README.rdoc",
      "Rakefile",
@@ -30,7 +29,7 @@ Gem::Specification.new do |s|
   s.homepage = %q{http://github.com/daneharrigan/thread_so_safe}
   s.rdoc_options = ["--charset=UTF-8"]
   s.require_paths = ["lib"]
-  s.rubygems_version = %q{1.3.6}
+  s.rubygems_version = %q{1.3.7}
   s.summary = %q{thread_so_safe is a very simple gem to help keep multi-threaded environments synced.}
   s.test_files = [
     "spec/spec_helper.rb",
@@ -41,13 +40,13 @@ Gem::Specification.new do |s|
     current_version = Gem::Specification::CURRENT_SPECIFICATION_VERSION
     s.specification_version = 3
 
-    if Gem::Version.new(Gem::RubyGemsVersion) >= Gem::Version.new('1.2.0') then
-      s.add_development_dependency(%q<rspec>, [">= 1.2.9"])
+    if Gem::Version.new(Gem::VERSION) >= Gem::Version.new('1.2.0') then
+      s.add_development_dependency(%q<rspec>, [">= 1.3.0"])
     else
-      s.add_dependency(%q<rspec>, [">= 1.2.9"])
+      s.add_dependency(%q<rspec>, [">= 1.3.0"])
     end
   else
-    s.add_dependency(%q<rspec>, [">= 1.2.9"])
+    s.add_dependency(%q<rspec>, [">= 1.3.0"])
   end
 end
 

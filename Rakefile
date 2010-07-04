@@ -1,6 +1,7 @@
 require 'rubygems'
 require 'rake'
 require 'spec/rake/spectask'
+require 'sdoc'
 
 begin
   require 'jeweler'
